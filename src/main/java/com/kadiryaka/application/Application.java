@@ -1,12 +1,16 @@
 package com.kadiryaka.application;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.hibernate.Session;
 
 import com.kadiryaka.entity.Program;
+import com.kadiryaka.entity.Sportsman;
 import com.kadiryaka.entity.Advisor;
 import com.kadiryaka.entity.Contact;
 
@@ -18,37 +22,44 @@ public class Application {
 		session.beginTransaction();
 		
 		Advisor advisor = new Advisor();
-		advisor.setName("Mr.Richardson Hoca");
+		Random rnd = new Random();
+		advisor.setName("Mr.Richardson Hoca" + rnd.nextInt(1000));
 		advisor.setAge(35L);
 		
 		List<Program> programList = new ArrayList<Program>();
 		Program program = createProgram();
-		Program program2 = createProgram();
 		programList.add(program);
-		programList.add(program2);
 		advisor.setProgramList(programList);
 		
 		List<Contact> contactList = new ArrayList<Contact>();
 		Contact contact = createContact(advisor);
-		Contact contact2 = createContact(advisor);
 		contactList.add(contact);
-		contactList.add(contact2);
 		advisor.setContactList(contactList);
+		
+		Set<Sportsman> sportsmanList = new HashSet<Sportsman>();
+		Sportsman sportsman1 = createSportsman(advisor);
+		sportsmanList.add(sportsman1);
+		advisor.setSportmanList(sportsmanList);
 		
 		session.save(advisor);
 		
-		session.getTransaction().commit();
+		session.flush();
 		
 		Advisor dbAdvisor = (Advisor)session.get(Advisor.class, advisor.getId());
 		
-		System.out.println("Program name through Advisor object = " + dbAdvisor.getProgramList().get(0).getProgramName());
-		Program dbProgram = (Program)session.get(Program.class, program.getId());
-		//Program(dbProgram) object can't access to Advisor information. 
+	    for (Iterator<Sportsman> it = dbAdvisor.getSportmanList().iterator(); it.hasNext(); ) {
+	    	Sportsman f = it.next();
+	    	System.out.println("sportsman name from Advisor = " + f.getName());
+	    }
 		
-		System.out.println("Contact phone number through Advisor object = " + dbAdvisor.getContactList().get(0).getPhoneNumber());
-		//Contact object can access to Advisor information. 
-		Contact dbContact = (Contact)session.get(Contact.class, contact.getId());
-		System.out.println("Advisor name through Contact object = " + dbContact.getAdvisor().getName());
+		Sportsman dbSportsman = (Sportsman)session.get(Sportsman.class, sportsman1.getId());
+		
+	    for (Iterator<Advisor> it = dbSportsman.getAdvisorList().iterator(); it.hasNext(); ) {
+	    	Advisor f = it.next();
+	    	System.out.println("advisor name from Sportsman = " + f.getName());
+	    }
+	    
+	    session.getTransaction().commit();
 		
 		session.close();
 		HibernateUtil.getSessionFactory().close();
@@ -67,6 +78,16 @@ public class Application {
 		contact.setPhoneNumber("0535 971 64 " + (10 + rnd.nextInt(89)));
 		contact.setAdvisor(advisor);
 		return contact;
+	}
+	
+	public static Sportsman createSportsman(Advisor advisor) {
+		Sportsman sportsman = new Sportsman();
+		Random rnd = new Random();
+		sportsman.setName("Name" + rnd.nextInt(1000));
+		Set<Advisor> advisorList = new HashSet<Advisor>();
+		advisorList.add(advisor);
+		sportsman.setAdvisorList(advisorList );
+		return sportsman;
 	}
 
 }

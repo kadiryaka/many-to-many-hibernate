@@ -3,7 +3,9 @@ package com.kadiryaka.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,6 +14,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -38,6 +42,11 @@ public class Advisor implements Serializable {
 
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="advisor")
 	List<Contact> contactList = new ArrayList<Contact>();
+	
+	@ManyToMany(cascade=CascadeType.ALL)
+	@JoinTable(name="T_ADVISOR_SPORTSMAN", joinColumns=@JoinColumn(name = "ADVISOR_ID"), inverseJoinColumns=@JoinColumn(name = "SPORTSMAN_ID"))
+	private Set<Sportsman> sportmanList = new HashSet<Sportsman>();
+	
 	
 	public Long getId() {
 		return id;
@@ -77,6 +86,14 @@ public class Advisor implements Serializable {
 
 	public void setAge(Long age) {
 		this.age = age;
+	}
+
+	public Set<Sportsman> getSportmanList() {
+		return sportmanList;
+	}
+
+	public void setSportmanList(Set<Sportsman> sportmanList) {
+		this.sportmanList = sportmanList;
 	}
 	
 }
